@@ -8,7 +8,7 @@ from Rotation import rotatematrix
 
 ab = turtle.Turtle()
 ab.speed(2)
-ab.setposition(0, 0)
+
 
 root = Tk()
 root.minsize(900, 700)
@@ -74,7 +74,7 @@ B3 = Button(
     root,
     bd=5,
     font=myfont,
-    command=rotatematrix,
+    command=lambda : rotatematrix(T1,ListBox1,ab),
     text='Rotate'
 )
 B3.grid(row=7, column=2)

@@ -58,17 +58,21 @@ def multimatrix(T1,T2,ab):
         print("Result matrix:")
         for r in result:
             print(r)
+        if result:
+            result.append(result[0].copy())
 
         # Draw the result
-        ab.clear()
+       
         ab.penup()
-        ab.goto(0, 0)
+        ab.goto(result[0][0], result[0][1])
         ab.pendown()
+        
 
         for point in result:
+            
             if len(point) >= 2:
                 ab.goto(point[0], point[1])
 
-        ab.goto(0, 0)
+       
 
    

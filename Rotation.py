@@ -14,20 +14,37 @@ def rotatematrix(T1,ListBox1,ab):
                 x.append(numbers1)
 
         # Read the rotation
-        if(ListBox1.get(ListBox1.curselection()) == "30 degree"):
-            y = [[np.cos(np.pi/6),np.sin(np.pi/6)],[-np.sin(np.pi/6),np.cos(np.pi/6)]]
-        elif(ListBox1.get(ListBox1.curselection()) == "45 degree"):
-            y = [[np.cos(np.pi/4),np.sin(np.pi/4)],[-np.sin(np.pi/4),np.cos(np.pi/4)]]
-        elif(ListBox1.get(ListBox1.curselection()) == "60 degree"):
-            y = [[np.cos(np.pi/3),np.sin(np.pi/3)],[-np.sin(np.pi/3),np.cos(np.pi/3)]]
-        elif(ListBox1.get(ListBox1.curselection()) == "90 degree"):
-            y = [[np.cos(np.pi/2),np.sin(np.pi/2)],[-np.sin(np.pi/2),np.cos(np.pi/2)]]
-        elif(ListBox1.get(ListBox1.curselection()) == "180 degree"):
-            y = [[np.cos(np.pi),np.sin(np.pi)],[-np.sin(np.pi),np.cos(np.pi)]]
-        elif(ListBox1.get(ListBox1.curselection()) == "270 degree"):
-            y = [[np.cos(3*(np.pi)/2),np.sin(3*(np.pi)/2)],[-np.sin(3*(np.pi)/2),np.cos(3*(np.pi)/2)]]
-            
-        
+        # Read the selected rotation angle
+        selected = ListBox1.curselection()
+
+        if not selected:
+            print("Please select a rotation angle.")
+            return
+
+        angle = ListBox1.get(selected[0])
+        if angle == "30 degree":
+            theta = np.pi / 6
+
+        elif angle == "45 degree":
+            theta = np.pi / 4
+
+        elif angle == "60 degree":
+            theta = np.pi / 3
+
+        elif angle == "90 degree":
+            theta = np.pi / 2
+
+        elif angle == "180 degree":
+            theta = np.pi
+
+        elif angle == "270 degree":
+            theta = 3 * np.pi / 2
+
+        y = [
+            [np.cos(theta), np.sin(theta)],
+            [-np.sin(theta), np.cos(theta)]
+        ]
+                
 
         # Check that both matrices contain data
         if not x or not y:
@@ -54,6 +71,7 @@ def rotatematrix(T1,ListBox1,ab):
             for i in range(len(x))
         ]
 
+
         # Matrix multiplication
         for i in range(len(x)):
             for j in range(len(y[0])):
@@ -64,9 +82,11 @@ def rotatematrix(T1,ListBox1,ab):
         print("Result matrix:")
         for r in result:
             print(r)
+        if result:
+            result.append(result[0].copy())
 
         # Draw the result
-        ab.clear()
+        
         ab.penup()
         ab.goto(0, 0)
         ab.pendown()
@@ -75,6 +95,6 @@ def rotatematrix(T1,ListBox1,ab):
             if len(point) >= 2:
                 ab.goto(point[0], point[1])
 
-        ab.goto(0, 0)
+       
 
         
