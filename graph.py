@@ -143,13 +143,5 @@ B3 = Button(
     text='Rotate'
 )
 B3.grid(row=7, column=2)
-B4 = Button(
-    root,
-    bd=5,
-    font=myfont,
-    command=lambda : rotatematrix(T1,ListBox1,ab,refresh_history),
-    text='delete'
-)
-B4.grid(row=9, column=2)
 
 root.mainloop()
