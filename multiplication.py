@@ -1,7 +1,9 @@
 
 from tkinter import *
+from drawing_history import save_pattern
 
-def multimatrix(T1,T2,ab):
+
+def multimatrix(T1,T2,ab,refresh_history):
 
         # Read the first matrix
         data1 = T1.get("1.0", END).strip()
@@ -72,6 +74,9 @@ def multimatrix(T1,T2,ab):
             
             if len(point) >= 2:
                 ab.goto(point[0], point[1])
+
+        save_pattern(result, "Scale")
+        refresh_history()
 
        
 

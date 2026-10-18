@@ -1,7 +1,8 @@
     #Rotation Matrix
 from tkinter import *
 import numpy as np
-def rotatematrix(T1,ListBox1,ab):
+from drawing_history import save_pattern
+def rotatematrix(T1,ListBox1,ab,refresh_history):
 
         # Read the first matrix
         data1 = T1.get("1.0", END).strip()
@@ -88,13 +89,15 @@ def rotatematrix(T1,ListBox1,ab):
         # Draw the result
         
         ab.penup()
-        ab.goto(0, 0)
+        ab.goto(result[0][0], result[0][1])
         ab.pendown()
 
         for point in result:
             if len(point) >= 2:
                 ab.goto(point[0], point[1])
 
+        save_pattern(result,"Rotation")
+        refresh_history()
        
 
         

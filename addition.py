@@ -1,6 +1,7 @@
 from tkinter import *
+from drawing_history import save_pattern
  #Addition of matrix
-def addmatrix(T1,T2,ab):
+def addmatrix(T1,T2,ab,refresh_history):
 
         # Read the first matrix
         data1 = T1.get("1.0", END).strip()
@@ -69,3 +70,5 @@ def addmatrix(T1,T2,ab):
                 ab.goto(point[0], point[1])
                 ab.pd()
 
+        save_pattern(result,"Translate")
+        refresh_history()
