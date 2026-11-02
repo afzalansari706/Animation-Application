@@ -7,11 +7,13 @@ from addition import addmatrix
 from Rotation import rotatematrix
 from tkinter import ttk
 from drawing_history import patterns,save_pattern
+from pattern_selection import enable_pattern_selection
+
 
 
 ab = turtle.Turtle()
 ab.speed(2)
-
+screen  = ab.getscreen() # it return x and y value on click turtle screen
 
 root = Tk()
 root.minsize(900, 700)
@@ -92,6 +94,9 @@ ListBox1.insert(4,"90 degree")
 ListBox1.insert(5,"180 degree")
 ListBox1.insert(6,"270 degree")
 ListBox1.grid(row=6,column = 1)
+
+#calling a method of pattern selection
+enable_pattern_selection(screen,patterns,T1)
 
 #Making a tree view for showing data and doing clear,redo, and undo operation
 columns = ("Serial No.","Operation","Matrix")
