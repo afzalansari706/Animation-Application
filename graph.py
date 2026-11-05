@@ -1,110 +1,574 @@
+
 from tkinter import *
 import tkinter.font as font
 import turtle
-import numpy as np
+
+from tkinter import ttk
+
 from multiplication import multimatrix
 from addition import addmatrix
 from Rotation import rotatematrix
-from tkinter import ttk
-from drawing_history import patterns,save_pattern
+
+from drawing_history import patterns, save_pattern
 from pattern_selection import enable_pattern_selection
 
 
-
-ab = turtle.Turtle()
-ab.speed(2)
-screen  = ab.getscreen() # it return x and y value on click turtle screen
+# --------------------------------------------------
+# MAIN WINDOW
+# --------------------------------------------------
 
 root = Tk()
-root.minsize(900, 700)
-root.title('Animation Window')
-root.state('zoomed')
 
-#main Canvas
-main_canvas = Canvas(root)
+root.title("Animation Window")
+root.minsize(1000, 700)
+root.state("zoomed")  # Open the application in maximized mode.
 
-#main Scrollbar
-main_scrollbar = ttk.Scrollbar(root,orient="vertical",command=main_canvas.yview)
 
-#Frame that will contain all application widgets
-main_frame= Frame(main_canvas)
+# --------------------------------------------------
+# FONTS
+# --------------------------------------------------
 
-#Update Scrolling while the frame size is change
-main_frame.bind(
-    "<Configure>",#Configure is like event when size of window
-    lambda event: main_canvas.configure(scrollregion=main_canvas.bbox("all"))#it will return the coordinate of window
+# Creating fonts separately so we can reuse them in widgets.
+
+title_font = font.Font(
+    family="Helvetica",
+    size=22,
+    weight="bold"
 )
 
-# Put the frame inside the canvas
-main_canvas.create_window(
+heading_font = font.Font(
+    family="Helvetica",
+    size=13,
+    weight="bold"
+)
+
+button_font = font.Font(
+    family="Helvetica",
+    size=11,
+    weight="bold"
+)
+
+
+# --------------------------------------------------
+# MAIN SCROLLABLE CANVAS
+# --------------------------------------------------
+
+# Main Canvas:
+# It will contain the complete application interface.
+
+main_canvas = Canvas(
+    root,
+    highlightthickness=0
+)
+
+
+# Main vertical scrollbar:
+# It controls the vertical movement of the main Canvas.
+
+main_scrollbar = ttk.Scrollbar(
+    root,
+    orient="vertical",
+    command=main_canvas.yview
+)
+
+
+# Frame that will contain all application widgets.
+
+main_frame = Frame(main_canvas)
+
+
+# Put the main Frame inside the Canvas.
+# create_window() embeds a widget inside a Canvas.
+
+main_window = main_canvas.create_window(
     (0, 0),
     window=main_frame,
     anchor="nw"
 )
 
-# Connect the canvas and scrollbar
+
+# Update the scrolling region whenever the Frame size changes.
+# Configure event occurs when the widget's size or configuration changes.
+
+def update_scroll_region(event):
+
+    main_canvas.configure(
+        scrollregion=main_canvas.bbox("all")
+    )
+
+
+main_frame.bind(
+    "<Configure>",
+    update_scroll_region
+)
+
+
+# Make the main Frame width equal to the Canvas width.
+# This helps prevent unnecessary horizontal scrolling.
+
+def update_main_width(event):
+
+    main_canvas.itemconfig(
+        main_window,
+        width=event.width
+    )
+
+
+main_canvas.bind(
+    "<Configure>",
+    update_main_width
+)
+
+
+# Connect the Canvas and scrollbar.
+# yscrollcommand updates the scrollbar position.
+
 main_canvas.configure(
     yscrollcommand=main_scrollbar.set
 )
 
-main_canvas.pack(side="left", fill="both", expand=True)
-main_scrollbar.pack(side="right", fill="y")
 
-def scroll_main_window(event):# call when yview scorll happen throught mouse
+# Place the main Canvas and scrollbar inside the root window.
+
+main_canvas.pack(
+    side="left",
+    fill="both",
+    expand=True
+)
+
+main_scrollbar.pack(
+    side="right",
+    fill="y"
+)
+
+
+# --------------------------------------------------
+# MOUSE WHEEL SCROLLING
+# --------------------------------------------------
+
+# This function is called when the mouse wheel is used.
+
+def scroll_main_window(event):
+
     main_canvas.yview_scroll(
-        int(-1 * (event.delta / 120)),# int(+1/-1) indicate direction and movement of scrollbar (+ve move downward)(-ve move up )
-        "units" 
-    )# if i scroll down event.delta = -120 for up event.delta=120
 
-main_canvas.bind_all("<MouseWheel>", scroll_main_window)
+        int(-1 * (event.delta / 120)),
 
-myfont = font.Font(family='helvetica', size=22, weight='bold')
-myfont1 = font.Font(family='helvetica', size=20, weight='bold')
+        "units"
+
+    )
+
+    # event.delta indicates the direction of scrolling.
+    # Positive delta means scrolling upward.
+    # Negative delta means scrolling downward.
+    #
+    # -1 reverses the direction because Canvas scrolling
+    # uses positive and negative movement differently.
 
 
-L1 = Label(main_frame, text='Matrix to Graph', font=myfont, fg='cyan')
-L1.grid(row=0, column=1)
+# Bind the mouse wheel event to the main Canvas.
 
-L2 = Label(main_frame, text='2D Transformation', font=myfont,
-           fg='black', bg='white')
-L2.grid(row=1, column=1)
+main_canvas.bind_all(
+    "<MouseWheel>",
+    scroll_main_window
+)
 
-L3 = Label(main_frame, text='Matrix', font=myfont1,
-           fg='black', bg='white')
-L3.grid(row=3, column=0)
 
-T1 = Text(main_frame, bd=4, height=10, width=23)
-T1.grid(row=3, column=1)
+# --------------------------------------------------
+# MAIN TITLE
+# --------------------------------------------------
 
-L4 = Label(main_frame, text='Transformation', font=myfont1,
-           fg='black', bg='white')
-L4.grid(row=4, column=0)
+title_label = Label(
+    main_frame,
+    text="GRAPH MAKER",
+    font=title_font,
+    fg="darkblue",
+    pady=12
+)
 
-T2 = Text(main_frame, bd=4, height=10, width=23)
-T2.grid(row=4, column=1)
+# columnspan=2 means this widget occupies two columns.
 
-L5 = Label(main_frame,text = 'Select the degree for rotation',font = myfont1,fg='purple',bg='white',height = "2",width="90")
-L5.grid(row=5,column=1)
+title_label.grid(
+    row=0,
+    column=0,
+    columnspan=2,
+    sticky="ew"
+)
 
-ListBox1 = Listbox(main_frame,selectmode= 'single')
-ListBox1.insert(1,"30 degree")
-ListBox1.insert(2,"45 degree")
-ListBox1.insert(3,"60 degree")
-ListBox1.insert(4,"90 degree")
-ListBox1.insert(5,"180 degree")
-ListBox1.insert(6,"270 degree")
-ListBox1.grid(row=6,column = 1)
 
-#calling a method of pattern selection
-enable_pattern_selection(screen,patterns,T1)
+# --------------------------------------------------
+# LEFT PANEL - TRANSFORMATION CONTROLS
+# --------------------------------------------------
 
-#Making a tree view for showing data and doing clear,redo, and undo operation
-columns = ("Serial No.","Operation","Matrix")
-# Frame to hold the history table and scrollbar
-history_frame = Frame(main_frame)
-history_frame.grid(row=8, column=1, sticky="nsew")
+# LabelFrame groups related widgets together
+# and displays a heading around them.
 
-# History table
+left_panel = LabelFrame(
+    main_frame,
+    text="2D Transformation Controls",
+    font=heading_font,
+    padx=12,
+    pady=12
+)
+
+
+# Left panel occupies column 0.
+# sticky="nw" aligns it towards the top-left.
+
+left_panel.grid(
+    row=1,
+    column=0,
+    sticky="nw",
+    padx=10,
+    pady=10
+)
+
+
+# --------------------------------------------------
+# MATRIX INPUT
+# --------------------------------------------------
+
+L1 = Label(
+    left_panel,
+    text="Matrix",
+    font=heading_font
+)
+
+L1.grid(
+    row=0,
+    column=0,
+    sticky="w",
+    pady=(5, 3)
+)
+
+
+# Text widget for entering the original matrix.
+
+T1 = Text(
+    left_panel,
+    bd=2,
+    height=8,
+    width=28,
+    font=("Consolas", 11)
+)
+
+T1.grid(
+    row=1,
+    column=0,
+    sticky="ew",
+    pady=5
+)
+
+
+# --------------------------------------------------
+# TRANSFORMATION MATRIX
+# --------------------------------------------------
+
+L2 = Label(
+    left_panel,
+    text="Transformation Matrix",
+    font=heading_font
+)
+
+L2.grid(
+    row=2,
+    column=0,
+    sticky="w",
+    pady=(12, 3)
+)
+
+
+# Text widget for entering the transformation matrix.
+
+T2 = Text(
+    left_panel,
+    bd=2,
+    height=8,
+    width=28,
+    font=("Consolas", 11)
+)
+
+T2.grid(
+    row=3,
+    column=0,
+    sticky="ew",
+    pady=5
+)
+
+
+# --------------------------------------------------
+# ROTATION DEGREE SELECTION
+# --------------------------------------------------
+
+L3 = Label(
+    left_panel,
+    text="Select Rotation Degree",
+    font=heading_font,
+    fg="purple"
+)
+
+L3.grid(
+    row=4,
+    column=0,
+    sticky="w",
+    pady=(12, 5)
+)
+
+
+# Listbox allows the user to select one rotation degree.
+
+ListBox1 = Listbox(
+    left_panel,
+    selectmode="single",
+    height=5,
+    width=25,
+    font=("Arial", 11)
+)
+
+
+# Insert rotation options into the Listbox.
+
+ListBox1.insert(1, "30 degree")
+ListBox1.insert(2, "45 degree")
+ListBox1.insert(3, "60 degree")
+ListBox1.insert(4, "90 degree")
+ListBox1.insert(5, "180 degree")
+ListBox1.insert(6, "270 degree")
+
+
+ListBox1.grid(
+    row=5,
+    column=0,
+    sticky="ew",
+    pady=5
+)
+
+
+# --------------------------------------------------
+# OPERATION BUTTONS
+# --------------------------------------------------
+
+# Separate Frame to group all transformation buttons.
+
+button_frame = Frame(left_panel)
+
+button_frame.grid(
+    row=6,
+    column=0,
+    sticky="ew",
+    pady=15
+)
+
+
+# Scale button:
+# Calls multimatrix() from multiplication.py.
+#
+# T1              = Original matrix
+# T2              = Transformation matrix
+# ab              = Turtle object
+# refresh_history = Function to update the history table
+
+B1 = Button(
+    button_frame,
+    text="Scale",
+    font=button_font,
+    width=12,
+    bd=3,
+    command=lambda: multimatrix(
+        T1,
+        T2,
+        ab,
+        refresh_history
+    )
+)
+
+B1.grid(
+    row=0,
+    column=0,
+    padx=4,
+    pady=4
+)
+
+
+# Translate button:
+# Calls addmatrix() from addition.py.
+
+B2 = Button(
+    button_frame,
+    text="Translate",
+    font=button_font,
+    width=12,
+    bd=3,
+    command=lambda: addmatrix(
+        T1,
+        T2,
+        ab,
+        refresh_history
+    )
+)
+
+B2.grid(
+    row=0,
+    column=1,
+    padx=4,
+    pady=4
+)
+
+
+# Rotate button:
+# Calls rotatematrix() from Rotation.py.
+# ListBox1 provides the selected rotation degree.
+
+B3 = Button(
+    button_frame,
+    text="Rotate",
+    font=button_font,
+    width=12,
+    bd=3,
+    command=lambda: rotatematrix(
+        T1,
+        ListBox1,
+        ab,
+        refresh_history
+    )
+)
+
+B3.grid(
+    row=1,
+    column=0,
+    columnspan=2,
+    padx=4,
+    pady=5
+)
+
+
+# --------------------------------------------------
+# RIGHT PANEL
+# --------------------------------------------------
+
+# This Frame contains two main sections:
+# 1. Turtle drawing area.
+# 2. Pattern history table.
+
+right_panel = Frame(main_frame)
+
+right_panel.grid(
+    row=1,
+    column=1,
+    sticky="nsew",
+    padx=10,
+    pady=10
+)
+
+
+# --------------------------------------------------
+# GRAPH / TURTLE DRAWING AREA
+# --------------------------------------------------
+
+graph_frame = LabelFrame(
+    right_panel,
+    text="Graph / Drawing Area",
+    font=heading_font,
+    padx=5,
+    pady=5
+)
+
+
+# fill="both" allows the graph area to expand horizontally
+# and vertically.
+#
+# expand=True allows it to receive additional available space.
+
+graph_frame.pack(
+    fill="both",
+    expand=True,
+    pady=(0, 10)
+)
+
+
+# Canvas where Turtle will draw.
+# RawTurtle will use this Canvas instead of opening
+# a separate Turtle window.
+
+draw_canvas = Canvas(
+    graph_frame,
+    width=700,
+    height=500,
+    bg="white",
+    highlightthickness=1,
+    highlightbackground="gray"
+)
+
+
+draw_canvas.pack(
+    fill="both",
+    expand=True
+)
+
+
+# Create Turtle inside the Tkinter Canvas.
+
+ab = turtle.RawTurtle(draw_canvas)
+
+ab.speed(2)
+
+
+# getScreen() returns the Turtle Screen object.
+# We need this object to register mouse-click events.
+
+screen = ab.getscreen()
+
+
+# --------------------------------------------------
+# PATTERN SELECTION
+# --------------------------------------------------
+
+# This function enables the user to click on a drawn pattern.
+# It checks the clicked coordinates against saved patterns.
+# If a pattern is selected, its matrix is displayed in T1.
+
+enable_pattern_selection(
+    screen,
+    patterns,
+    T1
+)
+
+
+# --------------------------------------------------
+# PATTERN HISTORY TABLE
+# --------------------------------------------------
+
+# LabelFrame groups the history table and its scrollbar.
+
+history_frame = LabelFrame(
+    right_panel,
+    text="Pattern History",
+    font=heading_font,
+    padx=5,
+    pady=5
+)
+
+
+# History table is placed below the graph.
+# fill="x" allows it to occupy the available horizontal space.
+
+history_frame.pack(
+    fill="x",
+    expand=False
+)
+
+
+# Columns that will be displayed in the Treeview.
+
+columns = (
+    "Serial No.",
+    "Operation",
+    "Matrix"
+)
+
+
+# Create Treeview to display drawing history.
+
 history_table = ttk.Treeview(
     history_frame,
     columns=columns,
@@ -112,80 +576,192 @@ history_table = ttk.Treeview(
     height=8
 )
 
-history_table.heading("Serial No.", text="Serial No.")
-history_table.heading("Operation", text="Operation")
-history_table.heading("Matrix", text="Matrix")
 
-history_table.column("Serial No.", width=80, anchor="center")
-history_table.column("Operation", width=130)
-history_table.column("Matrix", width=350)
+# --------------------------------------------------
+# HISTORY TABLE HEADINGS
+# --------------------------------------------------
 
-# Vertical scrollbar
+history_table.heading(
+    "Serial No.",
+    text="Serial No."
+)
+
+history_table.heading(
+    "Operation",
+    text="Operation"
+)
+
+history_table.heading(
+    "Matrix",
+    text="Matrix"
+)
+
+
+# --------------------------------------------------
+# HISTORY TABLE COLUMNS
+# --------------------------------------------------
+
+# Configure the width and alignment of each column.
+
+history_table.column(
+    "Serial No.",
+    width=80,
+    minwidth=70,
+    anchor="center",
+    stretch=False
+)
+
+history_table.column(
+    "Operation",
+    width=120,
+    minwidth=100,
+    anchor="center",
+    stretch=False
+)
+
+history_table.column(
+    "Matrix",
+    width=400,
+    minwidth=150,
+    anchor="w",
+    stretch=True
+)
+
+
+# --------------------------------------------------
+# HISTORY TABLE SCROLLBAR
+# --------------------------------------------------
+
+# Vertical scrollbar for the history table.
+
 history_scrollbar = ttk.Scrollbar(
     history_frame,
     orient="vertical",
     command=history_table.yview
 )
 
-# Connect the table to the scrollbar
+
+# Connect Treeview and scrollbar.
+
 history_table.configure(
     yscrollcommand=history_scrollbar.set
 )
 
-# Place the table and scrollbar side by side
-history_table.grid(row=0, column=0, sticky="nsew")
-history_scrollbar.grid(row=0, column=1, sticky="ns")
 
-# Allow the table to expand inside the frame
-history_frame.grid_rowconfigure(0, weight=1)
-history_frame.grid_columnconfigure(0, weight=1)
+# Place the table and scrollbar side by side.
 
-#now we make function that do 2 task
-#1st remove the existing rows from table[it remove becoz we have to show lastest change]
-#2nd it will add all pattern with id,operation,matrix till lastest update
+history_table.grid(
+    row=0,
+    column=0,
+    sticky="nsew"
+)
+
+history_scrollbar.grid(
+    row=0,
+    column=1,
+    sticky="ns"
+)
+
+
+# Allow the history table to expand inside its Frame.
+
+history_frame.grid_rowconfigure(
+    0,
+    weight=1
+)
+
+history_frame.grid_columnconfigure(
+    0,
+    weight=1
+)
+
+
+# --------------------------------------------------
+# REFRESH HISTORY FUNCTION
+# --------------------------------------------------
+
+# This function performs two tasks:
+#
+# 1. Removes all existing rows from the Treeview.
+#    We remove them because we need to display the latest history.
+#
+# 2. Adds all patterns from the patterns list.
+#    Each pattern contains its ID, operation and matrix.
+
+
 def refresh_history():
+
+    # Remove existing rows from the history table.
+
     for item in history_table.get_children():
+
         history_table.delete(item)
 
+
+    # Insert all saved patterns into the history table.
+
     for pattern in patterns:
-        matrix_text = str(pattern['matrix'])
+
+        matrix_text = str(pattern["matrix"])
 
         history_table.insert(
             "",
             "end",
-            iid=str(pattern['id']),
+
+            # Use pattern ID as the unique Treeview item ID.
+            iid=str(pattern["id"]),
+
             values=(
+
                 pattern["id"],
+
                 pattern["operation"],
+
                 matrix_text
+
             )
         )
 
-B1 = Button(
-    main_frame,
-    bd=5,
-    font=myfont,
-    command=lambda: multimatrix(T1, T2,ab,refresh_history),
-    text='Scale'
-)
-B1.grid(row=7, column=0)
 
-B2 = Button(
-    main_frame,
-    bd=5,
-    font=myfont,
-    command=lambda: addmatrix(T1,T2,ab,refresh_history),
-    text='Translate'
-)
-B2.grid(row=7, column=1)
-B3 = Button(
-    main_frame,
-    bd=5,
-    font=myfont,
-    command=lambda : rotatematrix(T1,ListBox1,ab,refresh_history),
-    text='Rotate'
-)
-B3.grid(row=7, column=2)
+# Display previously saved patterns when application starts.
 
+refresh_history()
+
+
+# --------------------------------------------------
+# GRID CONFIGURATION
+# --------------------------------------------------
+
+# Left column:
+# weight=0 means it does not receive additional horizontal space.
+# It occupies the space required by its widgets.
+
+main_frame.grid_columnconfigure(
+    0,
+    weight=0
+)
+
+
+# Right column:
+# weight=1 means it receives the remaining horizontal space.
+# This gives more room to the graph and history table.
+
+main_frame.grid_columnconfigure(
+    1,
+    weight=1
+)
+
+
+# Allow the main content row to expand vertically.
+
+main_frame.grid_rowconfigure(
+    1,
+    weight=1
+)
+
+
+# --------------------------------------------------
+# START APPLICATION
+# --------------------------------------------------
 
 root.mainloop()
